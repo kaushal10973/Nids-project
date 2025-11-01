@@ -1,8 +1,8 @@
-#🛡️Network Intrusion Detection System (NIDS)
+# 🛡️Network Intrusion Detection System (NIDS)
 
 A comprehensive Python-based Network Intrusion Detection System with real-time packet capture, machine learning-based threat classification, and automated response capabilities.
 
-###✨ Features
+### ✨ Features
 Core Capabilities
 
 Real-Time Packet Capture: Live network traffic monitoring using Scapy
@@ -19,6 +19,7 @@ DoS (Denial of Service): SYN flood, UDP flood, ICMP flood, etc.
 Probe: Port scans, network mapping, vulnerability scanning
 R2L (Remote to Local): Unauthorized access attempts, password guessing
 U2R (User to Root): Privilege escalation, buffer overflow
+
 
 
 
