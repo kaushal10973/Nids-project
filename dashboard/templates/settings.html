@@ -1,0 +1,99 @@
+<h2 style="margin: 30px 0 20px 0; font-size: 24px;">System Settings</h2>
+
+<div class="table-container">
+    <h3 style="margin-bottom: 20px;">Network Configuration</h3>
+    <table>
+        <tr>
+            <td><strong>Interface</strong></td>
+            <td><code>{{ config.network.interface }}</code></td>
+        </tr>
+        <tr>
+            <td><strong>Filter</strong></td>
+            <td><code>{{ config.network.filter }}</code></td>
+        </tr>
+        <tr>
+            <td><strong>Packet Count</strong></td>
+            <td>{{ config.network.packet_count or 'Unlimited' }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="table-container">
+    <h3 style="margin-bottom: 20px;">Response Configuration</h3>
+    <table>
+        <tr>
+            <td><strong>Auto Block</strong></td>
+            <td>
+                {% if config.response.auto_block %}
+                    <span class="badge badge-success">Enabled</span>
+                {% else %}
+                    <span class="badge badge-secondary">Disabled</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Notifications</strong></td>
+            <td>
+                {% if config.response.notification_enabled %}
+                    <span class="badge badge-success">Enabled</span>
+                {% else %}
+                    <span class="badge badge-secondary">Disabled</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Alert Threshold</strong></td>
+            <td>{{ "%.0f"|format(config.response.alert_threshold * 100) }}% confidence</td>
+        </tr>
+        <tr>
+            <td><strong>Notification Email</strong></td>
+            <td>{{ config.response.email }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="table-container">
+    <h3 style="margin-bottom: 20px;">ML Models</h3>
+    <table>
+        <tr>
+            <td><strong>Random Forest Model</strong></td>
+            <td><code>{{ config.ml_models.random_forest }}</code></td>
+        </tr>
+        <tr>
+            <td><strong>Ensemble Model</strong></td>
+            <td><code>{{ config.ml_models.ensemble }}</code></td>
+        </tr>
+    </table>
+</div>
+
+<div class="table-container">
+    <h3 style="margin-bottom: 20px;">Database</h3>
+    <table>
+        <tr>
+            <td><strong>Database Path</strong></td>
+            <td><code>{{ config.database.path }}</code></td>
+        </tr>
+    </table>
+</div>
+
+<div class="alert alert-warning">
+    <strong>⚠️ Note:</strong> Settings can be modified in the <code>config.yaml</code> file. 
+    Restart the NIDS service after making changes.
+</div>
+{% endblock %}
+
+<!-- ====================
+     dashboard/templates/error.html
+     ==================== -->
+{% extends "base.html" %}
+
+{% block title %}Error - NIDS{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 60px 20px;">
+    <h2 style="font-size: 48px; color: #ff4757;">⚠️</h2>
+    <h3 style="margin: 20px 0; font-size: 24px;">An Error Occurred</h3>
+    <p style="color: #a0a0a0; margin-bottom: 30px;">{{ error }}</p>
+    <a href="/" class="btn btn-primary">Return to Dashboard</a>
+</div>
+{% endblock %}

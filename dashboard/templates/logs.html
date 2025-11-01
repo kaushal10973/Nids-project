@@ -1,0 +1,112 @@
+<h2 style="margin: 30px 0 20px 0; font-size: 24px;">Historical Alert Logs</h2>
+
+<div class="filters">
+    <form method="GET" action="/logs">
+        <div class="filter-group">
+            <div>
+                <label>Source IP</label>
+                <input type="text" name="src_ip" value="{{ filters.src_ip or '' }}" placeholder="e.g., 192.168.1.100">
+            </div>
+            
+            <div>
+                <label>Destination IP</label>
+                <input type="text" name="dst_ip" value="{{ filters.dst_ip or '' }}" placeholder="e.g., 10.0.0.1">
+            </div>
+            
+            <div>
+                <label>Classification</label>
+                <select name="class_label">
+                    <option value="">All</option>
+                    <option value="Normal" {% if filters.class_label == 'Normal' %}selected{% endif %}>Normal</option>
+                    <option value="DoS" {% if filters.class_label == 'DoS' %}selected{% endif %}>DoS</option>
+                    <option value="Probe" {% if filters.class_label == 'Probe' %}selected{% endif %}>Probe</option>
+                    <option value="R2L" {% if filters.class_label == 'R2L' %}selected{% endif %}>R2L</option>
+                    <option value="U2R" {% if filters.class_label == 'U2R' %}selected{% endif %}>U2R</option>
+                </select>
+            </div>
+            
+            <div>
+                <label>Start Date</label>
+                <input type="datetime-local" name="start_date" value="{{ filters.start_date or '' }}">
+            </div>
+            
+            <div>
+                <label>End Date</label>
+                <input type="datetime-local" name="end_date" value="{{ filters.end_date or '' }}">
+            </div>
+            
+            <div style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="table-container">
+    <h3 style="margin-bottom: 20px; font-size: 18px;">
+        Alert Log 
+        <span style="color: #a0a0a0; font-size: 14px; font-weight: normal;">
+            (Page {{ page }}, showing {{ logs|length }} results)
+        </span>
+    </h3>
+    
+    {% if logs %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Protocol</th>
+                <th>Class</th>
+                <th>Attack Type</th>
+                <th>Confidence</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>#{{ log.id }}</td>
+                <td>{{ log.timestamp }}</td>
+                <td><code>{{ log.src_ip }}:{{ log.src_port or 0 }}</code></td>
+                <td><code>{{ log.dst_ip }}:{{ log.dst_port or 0 }}</code></td>
+                <td>{{ log.protocol }}</td>
+                <td>
+                    {% if log.class_label == 'Normal' %}
+                        <span class="badge badge-success">{{ log.class_label }}</span>
+                    {% else %}
+                        <span class="badge badge-danger">{{ log.class_label }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ log.attack_type or '-' }}</td>
+                <td>{{ "%.1f"|format(log.confidence * 100) }}%</td>
+                <td>
+                    {% if log.action_taken %}
+                        <span class="badge badge-info">{{ log.action_taken }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary">logged</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+        {% if page > 1 %}
+        <a href="?page={{ page - 1 }}&per_page={{ per_page }}" class="btn btn-primary">← Previous</a>
+        {% endif %}
+        
+        {% if logs|length == per_page %}
+        <a href="?page={{ page + 1 }}&per_page={{ per_page }}" class="btn btn-primary">Next →</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="loading">
+        <p>No logs found matching your criteria.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

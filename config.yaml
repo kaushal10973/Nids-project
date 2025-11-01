@@ -1,0 +1,26 @@
+network:
+  interface: "eth0"  # Network interface to monitor
+  filter: "tcp or udp or icmp"
+  packet_count: 0  # 0 = infinite
+
+database:
+  path: "nids.db"
+  
+ml_models:
+  random_forest: "models/model_rf.pkl"
+  ensemble: "models/model_ensemble.pkl"
+
+dashboard:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+
+response:
+  auto_block: true
+  notification_enabled: true
+  alert_threshold: 0.7  # Confidence threshold
+  email: "admin@example.com"
+
+logging:
+  level: "INFO"
+  file: "nids.log"

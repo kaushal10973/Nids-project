@@ -1,0 +1,146 @@
+<h2 style="margin: 30px 0 20px 0; font-size: 24px;">Real-Time Monitoring Dashboard</h2>
+
+<div class="stats-grid">
+    <div class="stat-card info">
+        <h3>Total Alerts</h3>
+        <div class="value">{{ stats.total_alerts or 0 }}</div>
+        <small>All time</small>
+    </div>
+    
+    <div class="stat-card danger">
+        <h3>Attack Attempts</h3>
+        <div class="value">{{ stats.by_class.get('DoS', 0) + stats.by_class.get('Probe', 0) + stats.by_class.get('R2L', 0) + stats.by_class.get('U2R', 0) }}</div>
+        <small>Detected threats</small>
+    </div>
+    
+    <div class="stat-card warning">
+        <h3>Recent Activity</h3>
+        <div class="value">{{ stats.recent_alerts or 0 }}</div>
+        <small>Last hour</small>
+    </div>
+    
+    <div class="stat-card success">
+        <h3>Normal Traffic</h3>
+        <div class="value">{{ stats.by_class.get('Normal', 0) }}</div>
+        <small>Legitimate connections</small>
+    </div>
+</div>
+
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    {% if stats.by_class %}
+        {% for class_name, count in stats.by_class.items() %}
+        <div class="stat-card">
+            <h3>{{ class_name }}</h3>
+            <div class="value" style="font-size: 28px;">{{ count }}</div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="table-container">
+    <h3 style="margin-bottom: 20px; font-size: 18px;">Recent Alerts</h3>
+    
+    {% if recent_alerts %}
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Source IP</th>
+                <th>Destination IP</th>
+                <th>Protocol</th>
+                <th>Classification</th>
+                <th>Attack Type</th>
+                <th>Confidence</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alert in recent_alerts %}
+            <tr>
+                <td>{{ alert.timestamp }}</td>
+                <td><code>{{ alert.src_ip }}:{{ alert.src_port or 0 }}</code></td>
+                <td><code>{{ alert.dst_ip }}:{{ alert.dst_port or 0 }}</code></td>
+                <td>{{ alert.protocol }}</td>
+                <td>
+                    {% if alert.class_label == 'Normal' %}
+                        <span class="badge badge-success">{{ alert.class_label }}</span>
+                    {% elif alert.class_label == 'DoS' %}
+                        <span class="badge badge-danger">{{ alert.class_label }}</span>
+                    {% elif alert.class_label == 'Probe' %}
+                        <span class="badge badge-warning">{{ alert.class_label }}</span>
+                    {% else %}
+                        <span class="badge badge-danger">{{ alert.class_label }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ alert.attack_type or '-' }}</td>
+                <td>{{ "%.2f"|format(alert.confidence * 100) }}%</td>
+                <td>
+                    {% if alert.action_taken %}
+                        <span class="badge badge-info">{{ alert.action_taken }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary">None</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="loading">
+        <p>No alerts detected yet. System is monitoring...</p>
+    </div>
+    {% endif %}
+</div>
+
+{% if stats.top_attacking_ips %}
+<div class="table-container">
+    <h3 style="margin-bottom: 20px; font-size: 18px;">Top Attacking IPs</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Source IP</th>
+                <th>Attack Count</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ip_data in stats.top_attacking_ips %}
+            <tr>
+                <td><code>{{ ip_data.src_ip }}</code></td>
+                <td>{{ ip_data.count }}</td>
+                <td><span class="badge badge-danger">Threat</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="alert alert-info">
+    <strong>ℹ️ System Status:</strong> NIDS is actively monitoring network traffic. 
+    Auto-blocking: <strong>{{ 'Enabled' if config.response.auto_block else 'Disabled' }}</strong> | 
+    Notifications: <strong>{{ 'Enabled' if config.response.notification_enabled else 'Disabled' }}</strong>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    console.log('NIDS Dashboard loaded');
+    
+    // Could add live chart updates here using Chart.js
+    async function updateMetrics() {
+        try {
+            const response = await fetch('/api/statistics');
+            const data = await response.json();
+            if (data.success) {
+                console.log('Stats updated:', data.statistics);
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        }
+    }
+    
+    // Update every 10 seconds
+    setInterval(updateMetrics, 10000);
+</script>
+{% endblock %}
